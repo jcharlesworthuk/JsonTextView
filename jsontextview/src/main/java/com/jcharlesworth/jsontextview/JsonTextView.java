@@ -1,10 +1,12 @@
 package com.jcharlesworth.jsontextview;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.view.View;
 
@@ -37,6 +39,7 @@ public class JsonTextView extends View {
         init(attrs);
     }
 
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public JsonTextView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         init(attrs);
