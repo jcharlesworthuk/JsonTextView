@@ -142,7 +142,7 @@ public class JsonTextView extends View {
         } else {
             //TODO: not supported!
         }
-
+        measured = false;
         this.requestLayout();
         this.invalidate();
     }
