@@ -1,3 +1,5 @@
+[ ![Download](https://api.bintray.com/packages/jcharlesworthuk/maven/jsontextview/images/download.svg) ](https://bintray.com/jcharlesworthuk/maven/jsontextview/_latestVersion)
+
 # JsonTextView
 Android view for displaying JSON strings in a nice readable way.
 
