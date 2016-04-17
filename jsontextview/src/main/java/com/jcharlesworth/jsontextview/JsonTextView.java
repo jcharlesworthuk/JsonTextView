@@ -26,23 +26,26 @@ import java.util.Set;
 public class JsonTextView extends View {
     public JsonTextView(Context context) {
         super(context);
-        init(null);
+        init();
     }
 
     public JsonTextView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        init(attrs);
+        readAttributes(attrs);
+        init();
     }
 
     public JsonTextView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        init(attrs);
+        readAttributes(attrs);
+        init();
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public JsonTextView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        init(attrs);
+        readAttributes(attrs);
+        init();
     }
 
     @Override
@@ -53,50 +56,53 @@ public class JsonTextView extends View {
     DrawConfig config;
     int measuredWidth = 0;
     int measuredHeight = 0;
+    Paint skeletonPaint;
 
-    private void init(AttributeSet attrs) {
-        Paint skeletonPaint = new Paint();
-        Paint propertyNamePaint;
-        Paint propertyValuePaint;
-        boolean enquoteStrings = true;
-        boolean enquotePropertyNames = false;
-        float textSize = 20F;
+    private int propertyNameColour = Color.BLACK;
+    private int propertyValueColour = Color.BLACK;
+    private int textColour = Color.BLACK;
+    private boolean enquotePropertyNames = false;
+    private boolean enquoteStrings = true;
+    private float textSize = 20F;
 
-        if (attrs !=null ) {
-            TypedArray attributes = this.getContext().obtainStyledAttributes(attrs, R.styleable.JsonTextView);
-            textSize = attributes.getDimension(R.styleable.JsonTextView_textSize, textSize);
-            skeletonPaint.setTextSize(textSize);
+    private void readAttributes(AttributeSet attrs) {
+        if (attrs == null)
+            return;
 
-            if (attributes.hasValue(R.styleable.JsonTextView_propertyNameColor)) {
-                propertyNamePaint = new Paint(skeletonPaint);
-                propertyNamePaint.setColor(attributes.getColor(R.styleable.JsonTextView_propertyNameColor, 0));
-            } else {
-                propertyNamePaint = skeletonPaint;
-            }
-
-            if (attributes.hasValue(R.styleable.JsonTextView_propertyValueColor)) {
-                propertyValuePaint = new Paint(skeletonPaint);
-                propertyValuePaint.setColor(attributes.getColor(R.styleable.JsonTextView_propertyValueColor, 0));
-            } else {
-                propertyValuePaint = skeletonPaint;
-            }
-
-            enquoteStrings = attributes.getBoolean(R.styleable.JsonTextView_enquoteStrings, enquoteStrings);
-            enquotePropertyNames = attributes.getBoolean(R.styleable.JsonTextView_enquotePropertyNames, enquotePropertyNames);
+        TypedArray attributes = this.getContext().obtainStyledAttributes(attrs, com.jcharlesworth.jsontextview.R.styleable.JsonTextView);
+        this.textSize = attributes.getDimension(com.jcharlesworth.jsontextview.R.styleable.JsonTextView_textSize, 20F);
 
 
-            skeletonPaint.setColor(attributes.getColor(R.styleable.JsonTextView_textColor, Color.BLACK));
-
-
-            attributes.recycle();
-        } else {
-            skeletonPaint.setColor(Color.BLACK);
-            propertyNamePaint = skeletonPaint;
-            propertyValuePaint = skeletonPaint;
-            skeletonPaint.setTextSize(textSize);
+        if (attributes.hasValue(com.jcharlesworth.jsontextview.R.styleable.JsonTextView_propertyNameColor)) {
+            this.propertyNameColour = attributes.getColor(com.jcharlesworth.jsontextview.R.styleable.JsonTextView_propertyNameColor, 0);
         }
 
-        this.config = new DrawConfig(enquoteStrings, enquotePropertyNames, skeletonPaint, propertyNamePaint, propertyValuePaint, textSize, (float)(textSize * 1.2));
+        if (attributes.hasValue(com.jcharlesworth.jsontextview.R.styleable.JsonTextView_propertyValueColor)) {
+            this.propertyValueColour = attributes.getColor(com.jcharlesworth.jsontextview.R.styleable.JsonTextView_propertyValueColor, 0);
+        }
+        this.enquoteStrings = attributes.getBoolean(com.jcharlesworth.jsontextview.R.styleable.JsonTextView_enquoteStrings, enquoteStrings);
+        this.enquotePropertyNames = attributes.getBoolean(com.jcharlesworth.jsontextview.R.styleable.JsonTextView_enquotePropertyNames, enquotePropertyNames);
+
+        this.textColour = attributes.getColor(com.jcharlesworth.jsontextview.R.styleable.JsonTextView_textColor, Color.BLACK);
+        attributes.recycle();
+    }
+
+    private void init() {
+        skeletonPaint = new Paint();
+        Paint propertyNamePaint;
+        Paint propertyValuePaint;
+
+        skeletonPaint.setTextSize(textSize);
+
+        propertyNamePaint = new Paint(skeletonPaint);
+        propertyNamePaint.setColor(propertyNameColour);
+
+        propertyValuePaint = new Paint(skeletonPaint);
+        propertyValuePaint.setColor(propertyValueColour);
+
+        skeletonPaint.setColor(textColour);
+
+        this.config = new DrawConfig(enquoteStrings, enquotePropertyNames, skeletonPaint, propertyNamePaint, propertyValuePaint, textSize, (float) (textSize * 1.2));
     }
 
 
@@ -123,6 +129,11 @@ public class JsonTextView extends View {
     private boolean measured = false;
 
 
+    public void setTextSize(float size) {
+        textSize = size;
+        init();
+    }
+
 
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
@@ -136,9 +147,9 @@ public class JsonTextView extends View {
         JsonParser jsonParser = new JsonParser();
         JsonElement parsed = jsonParser.parse(jsonString);
         if (parsed instanceof JsonArray) {
-            json = new ArrayObjectArea((JsonArray)parsed);
-        } else if (parsed instanceof  JsonObject) {
-            json = new NestedObjectArea((JsonObject)parsed);
+            json = new ArrayObjectArea((JsonArray) parsed);
+        } else if (parsed instanceof JsonObject) {
+            json = new NestedObjectArea((JsonObject) parsed);
         } else {
             //TODO: not supported!
         }
@@ -235,6 +246,7 @@ public class JsonTextView extends View {
         public abstract void draw(Canvas canvas, DrawConfig config);
 
         public abstract int getLineCount();
+
         public abstract float getMaxX();
     }
 
@@ -394,7 +406,7 @@ public class JsonTextView extends View {
         @Override
         public void draw(Canvas canvas, DrawConfig config) {
             canvas.drawText("[", this.start.x, this.start.getY(config), config.getSkeletonPaint());
-            for(ObjectArea item : this.items) {
+            for (ObjectArea item : this.items) {
                 item.draw(canvas, config);
                 if (item != this.items.get(this.items.size() - 1)) {
                     canvas.drawText(",", item.end.x, item.end.getY(config), config.getSkeletonPaint());
@@ -406,7 +418,7 @@ public class JsonTextView extends View {
         @Override
         public int getLineCount() {
             int itemSum = 0;
-            for(ObjectArea item : this.items) {
+            for (ObjectArea item : this.items) {
                 itemSum += item.getLineCount();
             }
             return itemSum + 1;
@@ -415,7 +427,7 @@ public class JsonTextView extends View {
         @Override
         public float getMaxX() {
             float x = Math.max(this.start.x, this.end.x);
-            for(ObjectArea item : this.items) {
+            for (ObjectArea item : this.items) {
                 x = Math.max(x, item.getMaxX());
             }
             return x;
