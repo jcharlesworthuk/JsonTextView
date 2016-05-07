@@ -1,5 +1,4 @@
 [ ![Download](https://api.bintray.com/packages/jcharlesworthuk/maven/jsontextview/images/download.svg) ](https://bintray.com/jcharlesworthuk/maven/jsontextview/_latestVersion)
-[![Build Status](https://travis-ci.org/jcharlesworthuk/JsonTextView.svg?branch=master)](https://travis-ci.org/jcharlesworthuk/JsonTextView)
 
 # JsonTextView
 Android view for displaying JSON strings in a nice readable way.
